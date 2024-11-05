@@ -7,7 +7,6 @@ const DownloadPage = () => {
   const [downloadedFiles, setDownloadedFiles] = useState<string[]>([]);
   const [error, setError] = useState('');
 
-  // 组件加载时从 localStorage 读取已下载文件列表
   useEffect(() => {
     const downloaded = localStorage.getItem('downloadedFiles');
     if (downloaded) {
@@ -16,18 +15,15 @@ const DownloadPage = () => {
   }, []);
 
   const handleDownload = () => {
-    // 检查文件是否已经下载过
     if (downloadedFiles.includes(name)) {
       setError(`${name}.png 已经被下载过了`);
       return;
     }
 
-    // 创建下载链接
     const link = document.createElement('a');
     link.href = `/images/${name}.png`;
     link.download = `${name}.png`;
     
-    // 检查文件是否存在
     fetch(link.href)
       .then(response => {
         if (!response.ok) {
@@ -36,15 +32,12 @@ const DownloadPage = () => {
         return response.blob();
       })
       .then(() => {
-        // 文件存在，执行下载
         link.click();
         
-        // 更新已下载文件列表
         const newDownloadedFiles = [...downloadedFiles, name];
         setDownloadedFiles(newDownloadedFiles);
         localStorage.setItem('downloadedFiles', JSON.stringify(newDownloadedFiles));
         
-        // 关闭模态框并清空输入
         setShowModal(false);
         setName('');
         setError('');
