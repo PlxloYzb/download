@@ -27,12 +27,6 @@ const DownloadPage = () => {
     link.href = `/images/${name}.png`;
     link.download = `${name}.png`;
     
-    // 添加错误处理
-    const handleError = () => {
-      setError(`${name}.png 文件不存在`);
-      link.removeEventListener('error', handleError);
-    };
-    
     // 检查文件是否存在
     fetch(link.href)
       .then(response => {
