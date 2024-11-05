@@ -1,7 +1,7 @@
 'use client';
 
-import DownloadPage from '../components/download-page'
+import DownloadPage from '../components/download-page';
 
-export default function Page() {
-  return <DownloadPage />
+export default function Home() {
+  return <DownloadPage />;
 }
