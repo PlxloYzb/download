@@ -4,11 +4,12 @@ import path from 'path';
 
 export async function GET(
   request: Request,
-  { params }: { params: { [key: string]: string } }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    const filename = decodeURIComponent(params.filename);
-    const filePath = path.join(process.cwd(), 'public', 'images', filename);
+    const { filename } = await params;
+    const decodedFilename = decodeURIComponent(filename);
+    const filePath = path.join(process.cwd(), 'public', 'images', decodedFilename);
 
     try {
       const fileBuffer = await readFile(filePath);
@@ -16,7 +17,7 @@ export async function GET(
       return new Response(fileBuffer, {
         headers: {
           'Content-Type': 'image/png',
-          'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+          'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(decodedFilename)}`,
         },
       });
     } catch (error) {
