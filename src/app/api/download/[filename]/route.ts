@@ -4,7 +4,7 @@ import path from 'path';
 
 export async function GET(
   request: Request,
-  { params }: { params: { filename: string } }
+  { params }: { params: { [key: string]: string } }
 ) {
   try {
     const filename = decodeURIComponent(params.filename);
