@@ -1,21 +1,15 @@
-// src/app/api/download/[filename]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-type Props = {
-  params: {
-    filename: string;
-  };
-};
-
+// 正确的参数类型定义
 export async function GET(
   request: NextRequest,
-  props: Props  // 使用正确的类型定义
+  { params }: { params: { filename: string } }
 ) {
   try {
     // 确保正确解码文件名
-    const filename = decodeURIComponent(props.params.filename);
+    const filename = decodeURIComponent(params.filename);
     const filePath = path.join(process.cwd(), 'public', 'images', filename);
 
     try {
