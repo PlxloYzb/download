@@ -3,13 +3,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
 
+type Props = {
+  params: {
+    filename: string;
+  };
+};
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } }
+  props: Props  // 使用正确的类型定义
 ) {
   try {
     // 确保正确解码文件名
-    const filename = decodeURIComponent(params.filename);
+    const filename = decodeURIComponent(props.params.filename);
     const filePath = path.join(process.cwd(), 'public', 'images', filename);
 
     try {
@@ -21,7 +27,6 @@ export async function GET(
       return new NextResponse(binaryData, {
         headers: {
           'Content-Type': 'image/png',
-          // 确保中文文件名能正确显示
           'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
         },
       });
