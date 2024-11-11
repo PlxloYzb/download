@@ -23,14 +23,7 @@ export async function POST(request: Request) {
     }
 
     // 从数据库中删除指定记录
-    const result = db.prepare('DELETE FROM downloads WHERE name = ?').run(name);
-
-    if (result.changes === 0) {
-      return NextResponse.json(
-        { success: false, message: '未找到指定记录' },
-        { status: 404 }
-      );
-    }
+    db.prepare('DELETE FROM downloads WHERE name = ?').run(name);
 
     return NextResponse.json({
       success: true,

@@ -4,34 +4,22 @@ import path from 'path';
 
 export async function GET(
   request: Request,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    if (!params?.filename) {
-      return NextResponse.json(
-        { success: false, message: '文件名无效' },
-        { status: 400 }
-      );
-    }
-
-    const filename = decodeURIComponent(params.filename);
-    const filePath = path.join(process.cwd(), 'public', 'images', filename);
+    const { filename } = await params;
+    const decodedFilename = decodeURIComponent(filename);
+    const filePath = path.join(process.cwd(), 'public', 'images', decodedFilename);
 
     try {
       const fileBuffer = await readFile(filePath);
 
-      const response = new NextResponse(fileBuffer, {
-        status: 200,
+      return new Response(fileBuffer, {
         headers: {
           'Content-Type': 'image/png',
-          'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
-          'Cache-Control': 'no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
+          'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(decodedFilename)}`,
         },
       });
-
-      return response;
     } catch (error) {
       console.error('File read error:', error);
       return NextResponse.json(

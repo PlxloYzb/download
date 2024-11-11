@@ -50,6 +50,14 @@ const DownloadPage = () => {
     setError('');
 
     try {
+      // 检查本地存储是否已下载
+      const downloadHistory = localStorage.getItem('downloadHistory') || '{}';
+      const history = JSON.parse(downloadHistory);
+      
+      if (history[name]) {
+        throw new Error('该姓名已经下载过二维码');
+      }
+
       // 第一步：请求下载权限和临时下载URL
       const response = await fetch('/api/download', {
         method: 'POST',
@@ -85,11 +93,19 @@ const DownloadPage = () => {
       // 创建一个隐藏的下载链接
       const link = document.createElement('a');
       link.href = url;
+      // 确保文件名正确编码
       link.download = `${name}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+
+      // 记录下载历史
+      history[name] = {
+        timestamp: Date.now(),
+        deviceId,
+      };
+      localStorage.setItem('downloadHistory', JSON.stringify(history));
 
       // 关闭模态框并重置状态
       setShowModal(false);
