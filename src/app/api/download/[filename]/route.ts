@@ -1,20 +1,27 @@
 import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import type { NextRequest } from 'next/server';
+
+// 修改类型定义
+type RouteContext = {
+  params: Promise<{ filename: string }>;
+};
 
 export async function GET(
-  request: Request,
-  context: { params: { filename: string } }
+  request: NextRequest,
+  context: RouteContext
 ) {
   try {
-    if (!context.params?.filename) {
+    const params = await context.params;
+    if (!params?.filename) {
       return NextResponse.json(
         { success: false, message: '文件名无效' },
         { status: 400 }
       );
     }
 
-    const filename = decodeURIComponent(context.params.filename);
+    const filename = decodeURIComponent(params.filename);
     const filePath = path.join(process.cwd(), 'public', 'images', filename);
 
     try {
