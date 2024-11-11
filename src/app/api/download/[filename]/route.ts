@@ -4,17 +4,17 @@ import path from 'path';
 
 export async function GET(
   request: Request,
-  { params }: { params: { filename: string } }
+  context: { params: { filename: string } }
 ) {
   try {
-    if (!params?.filename) {
+    if (!context.params?.filename) {
       return NextResponse.json(
         { success: false, message: '文件名无效' },
         { status: 400 }
       );
     }
 
-    const filename = decodeURIComponent(params.filename);
+    const filename = decodeURIComponent(context.params.filename);
     const filePath = path.join(process.cwd(), 'public', 'images', filename);
 
     try {
