@@ -13,6 +13,14 @@ const nextConfig = {
           { key: 'Access-Control-Max-Age', value: '86400' }
         ],
       },
+      {
+        source: '/api/download/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' }
+        ],
+      }
     ];
   },
 }

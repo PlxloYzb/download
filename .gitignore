@@ -29,8 +29,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# env files (can opt-in for commiting if needed)
+# env files
 .env*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -41,3 +45,7 @@ next-env.d.ts
 
 # SQLite database
 /data/*.db
+
+# 忽略图片文件但保留目录
+public/images/*
+!public/images/.gitkeep

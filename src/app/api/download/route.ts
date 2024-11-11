@@ -4,8 +4,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import db from '@/lib/db';
 
-// 添加 OPTIONS 方法处理
-export async function OPTIONS(request: Request) {
+// 移除未使用的 request 参数
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
