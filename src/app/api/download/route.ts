@@ -27,8 +27,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const fileName = `${name}.png`;
-    const filePath = path.join(process.cwd(), 'public', 'images', fileName);
+    const fileName = `${encodeURIComponent(name)}.png`;
+    const filePath = path.join(process.cwd(), 'public', 'images', decodeURIComponent(fileName));
 
     try {
       // 检查文件是否存在
@@ -45,8 +45,8 @@ export async function POST(request: Request) {
       'INSERT INTO downloads (name, device_id, timestamp) VALUES (?, ?, ?)'
     ).run(name, deviceId, Date.now());
 
-    // 生成临时下载URL
-    const downloadUrl = `/api/download/${encodeURIComponent(fileName)}`;
+    // 生成临时下载URL，确保文件名被正确编码
+    const downloadUrl = `/api/download/${fileName}`;
 
     return NextResponse.json({
       success: true,
