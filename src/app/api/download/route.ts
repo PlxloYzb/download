@@ -4,7 +4,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import db from '@/lib/db';
 
-// 移除未使用的 request 参数
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
@@ -28,7 +27,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // 检查是否已经下载过
     const existingDownload = db
       .prepare('SELECT * FROM downloads WHERE name = ?')
       .get(name);
@@ -44,7 +42,6 @@ export async function POST(request: Request) {
     const filePath = path.join(process.cwd(), 'public', 'images', decodeURIComponent(fileName));
 
     try {
-      // 检查文件是否存在
       await fs.access(filePath);
     } catch {
       return NextResponse.json(
@@ -53,24 +50,24 @@ export async function POST(request: Request) {
       );
     }
 
-    // 记录下载信息
     db.prepare(
       'INSERT INTO downloads (name, device_id, timestamp) VALUES (?, ?, ?)'
     ).run(name, deviceId, Date.now());
 
-    // 生成临时下载URL，确保文件名被正确编码
+    // 修改下载 URL 路径
     const downloadUrl = `/api/download/${fileName}`;
 
     const response = NextResponse.json({
       success: true,
       message: '下载授权成功',
       downloadUrl,
+    }, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      }
     });
-
-    // 添加 CORS 头
-    response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
 
     return response;
   } catch (error) {
