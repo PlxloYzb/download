@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     ).run(name, deviceId, Date.now());
 
     // 修改下载 URL 路径
-    const downloadUrl = `/api/download/${fileName}`;
+    const downloadUrl = `/images/${fileName}`;
 
     const response = NextResponse.json({
       success: true,

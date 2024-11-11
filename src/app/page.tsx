@@ -48,9 +48,9 @@ const DownloadPage = () => {
   const handleDownload = async () => {
     setLoading(true);
     setError('');
-
+  
     try {
-      // 第一步：请求下载权限和临时下载URL
+      // 请求下载授权和获取下载URL
       const response = await fetch('/api/download', {
         method: 'POST',
         headers: {
@@ -61,36 +61,25 @@ const DownloadPage = () => {
           deviceId,
         }),
       });
-
+  
       const data: DownloadResponse = await response.json();
-
+  
       if (!data.success) {
         throw new Error(data.message);
       }
-
+  
       if (!data.downloadUrl) {
         throw new Error('下载链接无效');
       }
-
-      // 第二步：下载文件
-      const fileResponse = await fetch(data.downloadUrl);
-      if (!fileResponse.ok) {
-        throw new Error('文件下载失败');
-      }
-
-      // 获取文件内容
-      const blob = await fileResponse.blob();
-      // 创建下载链接
-      const url = window.URL.createObjectURL(blob);
-      // 创建一个隐藏的下载链接
+  
+      // 创建一个隐藏的下载链接，触发浏览器下载
       const link = document.createElement('a');
-      link.href = url;
+      link.href = data.downloadUrl;
       link.download = `${name}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
+  
       // 关闭模态框并重置状态
       setShowModal(false);
       setName('');
@@ -101,6 +90,7 @@ const DownloadPage = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gray-100">
