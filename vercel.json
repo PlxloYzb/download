@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "next.config.js",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/download/(.*)",
+      "headers": {
+        "cache-control": "no-store, must-revalidate",
+        "pragma": "no-cache"
+      }
+    }
+  ]
+} 
