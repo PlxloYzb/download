@@ -2,15 +2,28 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import db from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
-    const { name } = await request.json();
+    const { name, deviceId } = await request.json();
 
-    if (!name) {
+    if (!name || !deviceId) {
       return NextResponse.json(
-        { success: false, message: '请提供姓名' },
+        { success: false, message: '请提供完整信息' },
         { status: 400 }
+      );
+    }
+
+    // 检查是否已经下载过
+    const existingDownload = db
+      .prepare('SELECT * FROM downloads WHERE name = ?')
+      .get(name);
+
+    if (existingDownload) {
+      return NextResponse.json(
+        { success: false, message: '该姓名已经下载过二维码' },
+        { status: 403 }
       );
     }
 
@@ -26,6 +39,11 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
+
+    // 记录下载信息
+    db.prepare(
+      'INSERT INTO downloads (name, device_id, timestamp) VALUES (?, ?, ?)'
+    ).run(name, deviceId, Date.now());
 
     // 生成临时下载URL
     const downloadUrl = `/api/download/${encodeURIComponent(fileName)}`;

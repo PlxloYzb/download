@@ -1,6 +1,7 @@
 // src/app/page.tsx
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { generateDeviceId } from '@/utils/device';
 
 interface DownloadResponse {
   success: boolean;
@@ -13,19 +14,60 @@ const DownloadPage = () => {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [deviceId, setDeviceId] = useState<string>('');
+
+  // 组件加载时生成设备ID
+  useEffect(() => {
+    const id = generateDeviceId();
+    setDeviceId(id);
+  }, []);
+
+  useEffect(() => {
+    // 监听记录操作的广播消息
+    const broadcastChannel = new BroadcastChannel('download_records');
+    broadcastChannel.onmessage = (event) => {
+      if (event.data.type === 'CLEAR_RECORDS') {
+        // 清空本地存储的下载历史
+        localStorage.removeItem('downloadHistory');
+      } else if (event.data.type === 'DELETE_RECORD') {
+        // 删除指定记录
+        const downloadHistory = localStorage.getItem('downloadHistory');
+        if (downloadHistory) {
+          const history = JSON.parse(downloadHistory);
+          delete history[event.data.name];
+          localStorage.setItem('downloadHistory', JSON.stringify(history));
+        }
+      }
+    };
+
+    return () => {
+      broadcastChannel.close();
+    };
+  }, []);
 
   const handleDownload = async () => {
     setLoading(true);
     setError('');
 
     try {
+      // 检查本地存储是否已下载
+      const downloadHistory = localStorage.getItem('downloadHistory') || '{}';
+      const history = JSON.parse(downloadHistory);
+      
+      if (history[name]) {
+        throw new Error('该姓名已经下载过二维码');
+      }
+
       // 第一步：请求下载权限和临时下载URL
       const response = await fetch('/api/download', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ 
+          name,
+          deviceId,
+        }),
       });
 
       const data: DownloadResponse = await response.json();
@@ -58,18 +100,12 @@ const DownloadPage = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      // 第三步：删除服务器上的文件
-      const deleteResponse = await fetch('/api/delete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name }),
-      });
-
-      if (!deleteResponse.ok) {
-        console.error('文件删除失败:', await deleteResponse.text());
-      }
+      // 记录下载历史
+      history[name] = {
+        timestamp: Date.now(),
+        deviceId,
+      };
+      localStorage.setItem('downloadHistory', JSON.stringify(history));
 
       // 关闭模态框并重置状态
       setShowModal(false);
