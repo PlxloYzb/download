@@ -4,8 +4,11 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import type { NextRequest } from 'next/server';
 
-type RouteContext = {
-  params: { filename: string };
+// 修正 RouteContext 类型定义
+type Params = {
+  params: {
+    filename: string;
+  };
 };
 
 // 添加 OPTIONS 方法处理 CORS 预检请求
@@ -21,12 +24,13 @@ export async function OPTIONS() {
   });
 }
 
+// 修正 GET 处理器的参数类型
 export async function GET(
-  request: NextRequest,
-  context: RouteContext
+  _request: NextRequest,
+  { params }: Params  // 使用正确的类型
 ) {
   try {
-    const { filename } = context.params;
+    const { filename } = params;
     if (!filename) {
       return NextResponse.json(
         { success: false, message: '文件名无效' },
@@ -48,7 +52,7 @@ export async function GET(
           'Cache-Control': 'no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0',
-          'Access-Control-Allow-Origin': '*',  // 添加 CORS 头
+          'Access-Control-Allow-Origin': '*',
         },
       });
 
